@@ -21,7 +21,7 @@ struct VirtualMachine {
 
     VirtualMachine(int i) : id(i), time(0), resource(0) {}
 
-    // 按照资源使用优先排序，若资源相等则按时间排序
+    // Sort by resource usage priority, and by time if resources are equal
     bool operator<(const VirtualMachine& vm) const {
         if (resource == vm.resource) {
             return time < vm.time;
@@ -30,7 +30,7 @@ struct VirtualMachine {
     }
 };
 
-// 初始化任务和虚拟机数据
+// Initialize task and virtual machine data
 vector<Task> tasks = {
     {1, 20.1, 20.18}, {2, 20.7, 80.65}, {3, 16.5, 201.20}, {4, 24.4, 100.92}, 
     {5, 16.0, 10.08}, {6, 28.2, 40.40}, {7, 32.3, 60.68}, {8, 16.1, 30.20}, 
@@ -41,21 +41,21 @@ vector<Task> tasks = {
 
 vector<VirtualMachine> vms = { {1}, {2}, {3}, {4} };
 
-// 常量定义：资源消耗的范围
+// Constant definitions: range of resource consumption
 const double Q_min = 50.0;
 const double Q_max = 200.0;
 
-// 任务分配函数
+// Task assignment function
 void assignTask(const Task& task, VirtualMachine& vm) {
     vm.time += task.time;
     vm.resource += task.resource;
     vm.tasks.push_back(task.id);
 }
 
-// 打印虚拟机的任务分配结果
+// Print the task allocation results for each virtual machine
 void printResult() {
     for (const auto& vm : vms) {
-        cout << "虚拟机" << vm.id << ": " << vm.time << "s, 资源消耗: " << vm.resource << "\n任务编号: ";
+        cout << "VM" << vm.id << ": " << vm.time << "s, Resource Consumption: " << vm.resource << "\nTask IDs: ";
         for (int taskId : vm.tasks) {
             cout << taskId << " ";
         }
@@ -63,22 +63,22 @@ void printResult() {
     }
 }
 
-// 任务调度逻辑
+// Task scheduling logic
 void scheduleTasks() {
-    // 按照任务时间进行排序
+    // Sort tasks by their time in descending order
     sort(tasks.begin(), tasks.end(), [](const Task& t1, const Task& t2) {
         return t1.time > t2.time;
     });
 
-    // 逐个将任务分配给资源最少的虚拟机
+    // Assign each task to the VM with the least resource usage
     while (!tasks.empty()) {
-        sort(vms.begin(), vms.end());  // 对虚拟机按资源消耗排序
-        assignTask(tasks.back(), vms.front());  // 分配给资源最少的虚拟机
+        sort(vms.begin(), vms.end());  // Sort VMs by resource consumption
+        assignTask(tasks.back(), vms.front());  // Assign to the VM with the least resource usage
         tasks.pop_back();
     }
 }
 
-// 资源均衡调整逻辑
+// Resource balancing adjustment logic
 void balanceResources() {
     while (true) {
         auto minVmIt = min_element(vms.begin(), vms.end(), [](const VirtualMachine& vm1, const VirtualMachine& vm2) {
@@ -89,10 +89,10 @@ void balanceResources() {
             return vm1.resource < vm2.resource;
         });
 
-        // 检查是否已经达到资源平衡
+        // Check if resource balance has been achieved
         if (maxVmIt->resource - minVmIt->resource <= Q_max - Q_min) break;
 
-        // 从资源消耗最大的虚拟机转移任务到资源最小的虚拟机
+        // Transfer tasks from the VM with the highest resource usage to the one with the lowest
         if (!maxVmIt->tasks.empty()) {
             int taskId = maxVmIt->tasks.back();
             auto itTask = find_if(tasks.rbegin(), tasks.rend(), [&](const Task& task) {
@@ -115,9 +115,9 @@ void balanceResources() {
 }
 
 int main() {
-    scheduleTasks();       // 任务调度
-    balanceResources();    // 资源均衡
-    printResult();         // 打印结果
+    scheduleTasks();       // Schedule tasks
+    balanceResources();    // Balance resources
+    printResult();         // Print results
 
     return 0;
 }
